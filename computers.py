@@ -19,9 +19,9 @@ class _Computer:
 		self.client = None
 
 	def openConnection(self):
-		key = paramiko.RSAKey(data = base64.decodestring(hostkey))
+		key = paramiko.RSAKey(data = base64.decodestring(self.key))
 		self.client = paramiko.SSHClient()
-		self.client.get_host_keys().add(ip, "ssh-rsa", key)
+		self.client.get_host_keys().add(self.ip, "ssh-rsa", key)
 		self.client.connect(self.ip, username = self.username, password = self.password)
 	
 	def closeConnection(self):
@@ -30,7 +30,8 @@ class _Computer:
 	def talk(self, message):
 		
 		# uses the say application
-		self.client.exec_command("say" + message)
+		message = "say " + message
+		self.client.exec_command(message)
 
 	def shutdown(self):
 		
@@ -43,8 +44,9 @@ def main():
 	
 	# play1
 	play1 = _Computer("play1")
-	play1.talk("shutting down now")
+	play1.openConnection()
 	#play1.shutdown()
+	play1.closeConnection()
 	
 	# shut down teleprompt
 	# shut down cg

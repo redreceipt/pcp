@@ -19,9 +19,15 @@ class _Computer:
 		self.client = None
 
 	def openConnection(self):
-		key = paramiko.RSAKey(data = base64.decodestring(self.key))
+		
 		self.client = paramiko.SSHClient()
-		self.client.get_host_keys().add(self.ip, "ssh-rsa", key)
+		self.client.set_missing_host_key_policy(paramiko.client.AutoAddPolicy())
+		
+		# use for hostkey authentication
+		#key = paramiko.RSAKey(data = base64.decodestring(self.key))
+		#self.client.get_host_keys().add(self.ip, "ssh-rsa", key)
+		#self.client.set_missing_host_key_policy(paramiko.client.RejectPolicy())
+		
 		self.client.connect(self.ip, username = self.username, password = self.password)
 	
 	def closeConnection(self):

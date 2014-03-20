@@ -6,6 +6,16 @@ import ConfigParser
 import argparse
 from Crypto.Cipher import AES
 
+_COMPUTER_LIST = [
+	"play1",
+	"cg",
+	"teleprompt",
+	"pvp"
+]
+
+def getComputerList():
+	return _COMPUTER_LIST
+
 def _addComputer(config, section):
 	config.set(section, "ip")
 	config.set(section, "rsaKey")
@@ -17,13 +27,13 @@ def _addDevice(config, section):
 	config.set(section, "ip")
 	return config
 
-def initHardwareCFG():
+def _initHardwareCFG():
 
 	# build new config file (use config.read() to read existing)
 	config = ConfigParser.ConfigParser()
 
 	# Computers
-	list = ["Play1", "CG", "Teleprompt", "PVP"]
+	list = getComputerList()
 	for computer in list:
 		config.add_section(computer)
 		config = _addComputer(config, computer)
@@ -38,7 +48,7 @@ def initHardwareCFG():
 	with open("./hardware.cfg", "wb") as hwcfg:
 		config.write(hwcfg)
 
-def encryptPasswords():
+def _encryptPasswords():
 
 	config = ConfigParser.ConfigParser()
 	config.read("hardware.cfg")
@@ -74,7 +84,7 @@ def decryptPassword(config, section):
 	else:
 		return config.get(section, "password")
 
-def main():
+def _main():
 	
 	# command line argument parser
 	parser = argparse.ArgumentParser(description = "Manages hardware network data")
@@ -82,8 +92,8 @@ def main():
 	parser.add_argument("-e", "--encrypt", action = "store_true", help = "Encrypts passwords")
 	args = parser.parse_args()
 	
-	if args.init: initHardwareCFG()
-	if args.encrypt: encryptPasswords()
+	if args.init: _initHardwareCFG()
+	if args.encrypt: _encryptPasswords()
 
 if __name__ == "__main__":
-	main()
+	_main()

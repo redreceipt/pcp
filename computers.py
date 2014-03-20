@@ -48,19 +48,27 @@ class _Computer:
 		time.sleep(1)
 		self.client.exec_command(self.password)
 
-def main():
+def _main():
 	
 	parser = argparse.ArgumentParser(description = "Manages production computers")
-	parser.add_argument("-s", "--shutdown")
+	parser.add_argument("-s", "--shutdown", action = "append", help = "Shuts down computer", default = "all")
+	parser.add_argument("-t", "--talk", nargs = 2, help = "Speaks a message")
+	args = parse_args()
 	
-	# play1
-	play1 = _Computer("play1")
-	play1.openConnection()
-	#play1.shutdown()
-	play1.closeConnection()
+	computerList = args.shutdown
+	if args.shutdown == ["all"]:
+		computerList = hardware.getComputerList()
+	for name in computerList:
+		computer = _Computer(name)
+		computer.openConnection()
+		computer.shutdown()
+		computer.closeConnection()
 	
-	# shut down teleprompt
-	# shut down cg
+	if args.talk:
+		computer = _Computer(args.talk[0])
+		computer.openConnection()
+		computer.talk(args.talk[0], args.talk[1])
+		computer.closeConnection()
 
 if __name__ == "__main__":
-	main()
+	_main()

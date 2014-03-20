@@ -3,6 +3,8 @@
 import os, time
 import paramiko, base64
 import ConfigParser
+import argparse
+import hardware
 
 # computer class
 class _Computer:
@@ -15,7 +17,7 @@ class _Computer:
 		self.ip = config.get(name, "ip")
 		self.key = config.get(name, "rsaKey")
 		self.username = config.get(name, "username")
-		self.password = config.get(name, "password")
+		self.password = hardware.decryptPassword(config, name)
 		self.client = None
 
 	def openConnection(self):
@@ -47,6 +49,9 @@ class _Computer:
 		self.client.exec_command(self.password)
 
 def main():
+	
+	parser = argparse.ArgumentParser(description = "Manages production computers")
+	parser.add_argument("-s", "--shutdown")
 	
 	# play1
 	play1 = _Computer("play1")

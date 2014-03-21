@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#
 # This library performs actions to generate and parse hardware information
 # from hardware.cfg file
 
@@ -76,7 +78,7 @@ def decryptPassword(config, section):
 	config.read("hardware.cfg")
 	aes = AES.new("this is the pcp password")
 	for char in config.get(section, "password"):
-		if (char.isalpha() == False and char.isnum() == False):
+		if (char.isalnum() == False):
 			encrypted = True
 
 	if encrypted:

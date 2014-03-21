@@ -1,4 +1,6 @@
-#!/bin/sh python
+#!/usr/bin/python
+#
+# manages computer functions
 
 import os, time
 import paramiko, base64
@@ -43,17 +45,35 @@ class _Computer:
 
 	def shutdown(self):
 		
-		# sudo shutdown and type in the password
-		self.client.exec_command("sudo shutdown now")
+		chan = self.client.invoke_shell()
+		
+		# Ssh and wait for the password prompt.
+		chan.send("sudo shutdown now")
+		buff = ""
+		while not buff.endswith(":"):
+			resp = chan.recv(9999)
+			buff += resp
+
+		# Send the password and wait for a prompt.
+		chan.send(self.password)
 		time.sleep(1)
-		self.client.exec_command(self.password)
+		chan.shutdown(2)
+		
+		"""
+		# sudo shutdown and type in the password
+		stdin, stdout, stderr = self.client.exec_command("sudo shutdown now")
+		for line in stderr: print line
+		time.sleep(5)
+		stdin.write(self.password + "\n")
+		stdin.flush()
+		"""
 
 def _main():
 	
 	parser = argparse.ArgumentParser(description = "Manages production computers")
-	parser.add_argument("-s", "--shutdown", action = "append", help = "Shuts down computer", default = "all")
+	parser.add_argument("-s", "--shutdown", action = "append", help = "Shuts down computer", default = [])
 	parser.add_argument("-t", "--talk", nargs = 2, help = "Speaks a message")
-	args = parse_args()
+	args = parser.parse_args()
 	
 	computerList = args.shutdown
 	if args.shutdown == ["all"]:
@@ -67,7 +87,7 @@ def _main():
 	if args.talk:
 		computer = _Computer(args.talk[0])
 		computer.openConnection()
-		computer.talk(args.talk[0], args.talk[1])
+		computer.talk(args.talk[1])
 		computer.closeConnection()
 
 if __name__ == "__main__":

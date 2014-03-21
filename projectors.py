@@ -1,36 +1,53 @@
-#!/bin/sh
+#!/usr/bin/python
 #
 # Projector Interface
 
 from selenium import webdriver
 import time
 from multiprocessing import Process
+import argparse
 
-def togglePower(ip, *args):
-
-	browser = webdriver.Chrome()
+# computer class
+class _Projector:
 	
-	# left projector
-	url = "http://" + ip + "/control.html"
-	browser.get(url)
-	assert "HDX" in browser.title
-	lamp = browser.find_element_by_id("lamp")
-	lamp.click()
-	time.sleep(1)
-	
-	browser.quit()
+	def __init__(self, name):
+		
+		config = ConfigParser.ConfigParser()
+		config.read("hardware.cfg")
+		self.ip = config.get(name, "ip")
 
-def main():
+	def togglePower(self, *args):
+	#####def togglePower(self, ip, *args):
+
+		browser = webdriver.Chrome()
+		
+		# left projector
+		url = "http://" + self.ip + "/control.html"
+		browser.get(url)
+		assert "HDX" in browser.title
+		lamp = browser.find_element_by_id("lamp")
+		lamp.click()
+		browser.quit()
+
+def _main():
+
+	parser = argparse.ArgumentParser(description = "Manages projectors")
+	parser.add_argument("-l", "--left", action = store_true, help = "toggles left projector power")
+	parser.add_argument("-c", "--center", action = store_true, help = "toggles center projector power")
+	parser.add_argument("-r", "--right", action = store_true, help = "toggles right projector power")
+	parser.add_argument("-a", "--all", action = store_true, help = "toggles all projectors' power")
+	args = parser.parse_args()
 
 	# define function pointers
-	left = Process(target = togglePower, args = ("10.5.30.201",))
-	center = Process(target = togglePower, args = ("10.5.30.202",))
-	right = Process(target = togglePower, args = ("10.5.30.203",))
+	left = Process(target = _Projector("leftProjector").togglePower())
+	right = Process(target = _Projector("rightProjector").togglePower())
+	center = Process(target = _Projector("centerProjector").togglePower())
+	#####right = Process(target = togglePower, args = ("10.5.30.203",))
 	
 	# start processes
-	left.start()
-	center.start()
-	right.start()
+	if args.left or args.all: left.start()
+	if args.center or args.all: center.start()
+	if args.right or args.all: right.start()
 	
 	# join processes
 	left.join()
@@ -38,5 +55,5 @@ def main():
 	right.join()
 	
 if __name__ == "__main__":
-	main()
+	_main()
 	

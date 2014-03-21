@@ -50,9 +50,9 @@ def _main():
 	if args.right or args.all: right.start()
 	
 	# join processes
-	left.join()
-	center.join()
-	right.join()
+	if args.left or args.all: left.join()
+	if args.center or args.all: center.join()
+	if args.right or args.all: right.join()
 	
 if __name__ == "__main__":
 	_main()

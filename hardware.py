@@ -12,11 +12,29 @@ _COMPUTER_LIST = [
 	"play1",
 	"cg",
 	"teleprompt",
-	"pvp"
+	"pvp",
+	"rightProjector",
+	"centerProjector",
+	"leftProjector",
+	"archive",
+	"kipro"
+]
+
+_DEVICE_LIST = [
+	"rightProjector",
+	"centerProjector",
+	"leftProjector",
+	"archive",
+	"kipro"
 ]
 
 def getComputerList():
+	"""Returns list of computers."""
 	return _COMPUTER_LIST
+
+def getDeviceList():
+	"""Returns list of network devices."""
+	return _DEVICE_LIST
 
 def _addComputer(config, section):
 	config.set(section, "ip")
@@ -41,7 +59,7 @@ def _initHardwareCFG():
 		config = _addComputer(config, computer)
 
 	# Projectors
-	list = ["rightProjector", "centerProjector", "leftProjector"]
+	list = getDeviceList
 	for device in list:
 		config.add_section(device)
 		config = _addDevice(config, device)
@@ -73,6 +91,7 @@ def _encryptPasswords():
 		config.write(hwcfg)
 
 def decryptPassword(config, section):
+	"""Decrypts passwords from hardware.cfg."""
 
 	encrypted = False
 	config.read("hardware.cfg")

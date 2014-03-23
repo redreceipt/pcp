@@ -1,20 +1,20 @@
-#!/bin/sh
+#!/usr/bin/python
 #
 # Main Start Menu
 
 import projectors
 
-def printStartMenu(interfaces):
+def _printStartMenu(interfaces):
 	
 
-def main():
+def _main():
 
 	interfaceList = []
 	##### getInterfaces from .INI file
 	
 	# Welcome to COL PCP
-	printStartMenu()
+	_printStartMenu()
 	
 
 if __name__ == "__main__":
-	main()
+	_main()

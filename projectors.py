@@ -3,7 +3,9 @@
 # Projector Interface
 
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import time
+import ConfigParser
 from multiprocessing import Process
 import argparse
 
@@ -19,7 +21,11 @@ class _Projector:
 	def togglePower(self, *args):
 	#####def togglePower(self, ip, *args):
 
-		browser = webdriver.Chrome()
+		options = Options()
+		# TODO: figure out how to supress Chrome window
+		#options.add_argument("--no-startup-window")
+		#options.add_argument("--silent-launch")
+		browser = webdriver.Chrome(chrome_options = options)
 		
 		# left projector
 		url = "http://" + self.ip + "/control.html"
@@ -32,10 +38,10 @@ class _Projector:
 def _main():
 
 	parser = argparse.ArgumentParser(description = "Manages projectors")
-	parser.add_argument("-l", "--left", action = store_true, help = "toggles left projector power")
-	parser.add_argument("-c", "--center", action = store_true, help = "toggles center projector power")
-	parser.add_argument("-r", "--right", action = store_true, help = "toggles right projector power")
-	parser.add_argument("-a", "--all", action = store_true, help = "toggles all projectors' power")
+	parser.add_argument("-l", "--left", action = "store_true", help = "toggles left projector power")
+	parser.add_argument("-c", "--center", action = "store_true", help = "toggles center projector power")
+	parser.add_argument("-r", "--right", action = "store_true", help = "toggles right projector power")
+	parser.add_argument("-a", "--all", action = "store_true", help = "toggles all projectors' power")
 	args = parser.parse_args()
 
 	# define function pointers

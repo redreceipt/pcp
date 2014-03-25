@@ -13,53 +13,77 @@ _COMPUTER_LIST = [
 	"cg",
 	"teleprompt",
 	"pvp",
+]
+
+_PROJECTOR_LIST = [
 	"rightProjector",
 	"centerProjector",
 	"leftProjector",
-	"archive",
-	"kipro"
 ]
 
 _DEVICE_LIST = [
-	"rightProjector",
-	"centerProjector",
-	"leftProjector",
 	"archive",
-	"kipro"
+]
+
+_DDR_LIST = [
+	"kipro",
 ]
 
 def getComputerList():
 	"""Returns list of computers."""
 	return _COMPUTER_LIST
 
-def getDeviceList():
-	"""Returns list of network devices."""
-	return _DEVICE_LIST
+def getProjectorList():
+	"""Returns list of projectors."""
+	return _PROJECTOR_LIST
+
+def getDDRList():
+	"""Returns list of DDR devices."""
+	return _DDR_LIST
+
+def getAllDeviceNames():
+	"""Returns list of every device within PCP."""
+	return getComputerList() + getProjectorList() + getDDRList()
 
 def _addComputer(config, section):
 	config.set(section, "ip")
 	config.set(section, "rsaKey")
 	config.set(section, "username")
 	config.set(section, "password")
+	config.set(section, "_shutdown", "OFF")
+	config.set(section, "_talk", "OFF")
+	return config
+
+def _addDDR(config, section):
+	config.set(section, "ip")
+	config.set(section, "_record", "OFF")
+	config.set(section, "_stop", "OFF")
+	config.set(section, "_unmount", "OFF")
 	return config
 
 def _addDevice(config, section):
 	config.set(section, "ip")
+	config.set(section, "_power", "OFF")
 	return config
 
 def _initHardwareCFG():
 
 	# build new config file (use config.read() to read existing)
 	config = ConfigParser.ConfigParser()
-
+	
 	# Computers
 	list = getComputerList()
 	for computer in list:
 		config.add_section(computer)
 		config = _addComputer(config, computer)
+		
+	list = getDDRList()
+	for DDR in list:
+		config.add_section(computer)
+		config = _addComputer(config, computer)
 
-	# Projectors
-	list = getDeviceList
+	# Devices with only IP addresses and power control
+	list = getProjectorList()
 	for device in list:
 		config.add_section(device)
 		config = _addDevice(config, device)

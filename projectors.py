@@ -44,7 +44,7 @@ def _main():
 	parser.add_argument("-a", "--all", action = "store_true", help = "toggles all projectors' power")
 	args = parser.parse_args()
 
-	# define function pointers
+	# define function pointers for multiprocessing
 	left = Process(target = _Projector("leftProjector").togglePower())
 	right = Process(target = _Projector("rightProjector").togglePower())
 	center = Process(target = _Projector("centerProjector").togglePower())

@@ -17,7 +17,7 @@ class _KiProDDR:
 		config.read("hardware.cfg")
 		self.ip = config.get(name, "ip")
 
-	def interface(self, id, showStatus = False):
+	def interface(self, id, showStatus):
 	#####def togglePower(self, ip, *args):
 
 		options = Options()
@@ -26,36 +26,48 @@ class _KiProDDR:
 		#options.add_argument("--silent-launch")
 		browser = webdriver.Chrome(chrome_options = options)
 		
-		# left projector
+		# open interface page
 		url = "http://" + self.ip
 		browser.get(url)
-		###button = browser.find_element_by_id(id)
-		####button.click()
+		time.sleep(1)
+		transport = browser.find_element_by_id("transport_page_link")
+		transport.click()
+		browser.switch_to_frame(browser.find_element_by_id("transport_controls_frame"))
+		
+		# do kipro function
+		if id:
+			button = browser.find_element_by_id(id)
+			button.click()
+			button.click()
 		
 		if showStatus:
-			disk = browser.find_element_by_id("eParamID_SelectedSlot")
-			space = browser.find_element_by_id("eParamID_CurrentMediaAvailable")
+			disk = browser.find_element_by_id("eParamID_SelectedSlot").text
+			space = browser.find_element_by_id("eParamID_CurrentMediaAvailable").text
+			if space == "": space = "N/A"
+			timecode = browser.find_element_by_id("eParamID_DisplayTimecode").text
 			print "Selected Slot: " + disk
 			print "Space Available: " + space
-			
+			if timecode == "00:00:00:00":
+				print "Status: Stopped"
+			else:
+				print "Status: Recording..."
+		
+		browser.switch_to_default_content()
 		browser.quit()
-
-	def showStatus(self):
-
-
 
 def _main():
 
 	parser = argparse.ArgumentParser(description = "Manages KiPro DDR")
-	parser.add_argument("-r", "--record", action = "store_true", help = "starts recording")
-	parser.add_argument("-s", "--stop", action = "store_true", help = "stops recording")
-	parser.add_argument("-u", "--unmount", action = "store_true", help = "unmounts and changes slot")
+	functions = parser.add_mutually_exclusive_group()
+	functions.add_argument("-r", "--record", action = "store_true", help = "starts recording")
+	functions.add_argument("-s", "--stop", action = "store_true", help = "stops recording")
+	functions.add_argument("-u", "--unmount", action = "store_true", help = "unmounts and changes slot")
 	parser.add_argument("-d", "--diskStatus", action = "store_true", help = "shows current disk and space available")
 	args = parser.parse_args()
 	
 	# initialize KiPro DDR
 	kipro = _KiProDDR("kipro")
-	id = "status_page_link"
+	id = None
 
 	# interface with KiPro web page
 	if args.record: id = "record"

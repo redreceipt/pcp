@@ -8,7 +8,6 @@ import ConfigParser
 import argparse
 import hardware
 
-# computer class
 class _Computer:
 	
 	def __init__(self, name):
@@ -45,28 +44,19 @@ class _Computer:
 
 	def shutdown(self):
 		
+		#"""
 		chan = self.client.invoke_shell()
 		
 		# Ssh and wait for the password prompt.
-		chan.send("sudo shutdown now")
+		chan.send("sudo shutdown -h now\n")
+		####chan.send("sudo shutdown -u now\n"), use this with UPS when looking at power on functions
 		buff = ""
-		while not buff.endswith(":"):
+		while "Password:" not in buff:
 			resp = chan.recv(9999)
 			buff += resp
 
-		# Send the password and wait for a prompt.
-		chan.send(self.password)
-		time.sleep(1)
-		chan.shutdown(2)
-		
-		"""
-		# sudo shutdown and type in the password
-		stdin, stdout, stderr = self.client.exec_command("sudo shutdown now")
-		for line in stderr: print line
-		time.sleep(5)
-		stdin.write(self.password + "\n")
-		stdin.flush()
-		"""
+		chan.send(self.password + "\n")
+		chan.close()
 
 def _main():
 	

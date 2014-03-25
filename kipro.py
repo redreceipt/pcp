@@ -16,6 +16,17 @@ class _KiProDDR:
 		config = ConfigParser.ConfigParser()
 		config.read("hardware.cfg")
 		self.ip = config.get(name, "ip")
+		self.options = _loadOptions(config, name)
+		
+	def _loadOptions(self, config, name):
+		options = {}
+		for option in filter(lambda x: if x[0] == "_", config.options(name)):
+			options[option] = config.get(name, option)
+		return options
+		
+	def getOption(self, option):
+		"""Returns hardware capability options."""
+		return self.options[option]
 
 	def interface(self, id, showStatus):
 	#####def togglePower(self, ip, *args):

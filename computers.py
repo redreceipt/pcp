@@ -20,6 +20,17 @@ class _Computer:
 		self.username = config.get(name, "username")
 		self.password = hardware.decryptPassword(config, name)
 		self.client = None
+		self.options = _loadOptions(config, name)
+		
+	def _loadOptions(self, config, name):
+		options = {}
+		for option in filter(lambda x: if x[0] == "_", config.options(name)):
+			options[option] = config.get(name, option)
+		return options
+		
+	def getOption(self, option):
+		"""Returns hardware capability options."""
+		return self.options[option]
 
 	def openConnection(self):
 		

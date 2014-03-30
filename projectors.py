@@ -17,11 +17,11 @@ class _Projector:
 		config = ConfigParser.ConfigParser()
 		config.read("hardware.cfg")
 		self.ip = config.get(name, "ip")
-		self.options = _loadOptions(config, name)
+		self.options = self._loadOptions(config, name)
 		
 	def _loadOptions(self, config, name):
 		options = {}
-		for option in filter(lambda x: if x[0] == "_", config.options(name)):
+		for option in filter(lambda x: x[0] == "_", config.options(name)):
 			options[option] = config.get(name, option)
 		return options
 		
@@ -31,6 +31,10 @@ class _Projector:
 
 	def togglePower(self, *args):
 	#####def togglePower(self, ip, *args):
+	
+		if self.options["_power"] != "ON":
+			print "Option not enabled. Exiting."
+			return 1
 
 		options = Options()
 		# TODO: figure out how to supress Chrome window

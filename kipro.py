@@ -16,11 +16,11 @@ class _KiProDDR:
 		config = ConfigParser.ConfigParser()
 		config.read("hardware.cfg")
 		self.ip = config.get(name, "ip")
-		self.options = _loadOptions(config, name)
+		self.options = self._loadOptions(config, name)
 		
 	def _loadOptions(self, config, name):
 		options = {}
-		for option in filter(lambda x: if x[0] == "_", config.options(name)):
+		for option in filter(lambda x: x[0] == "_", config.options(name)):
 			options[option] = config.get(name, option)
 		return options
 		
@@ -30,41 +30,51 @@ class _KiProDDR:
 
 	def interface(self, id, showStatus):
 	#####def togglePower(self, ip, *args):
-
-		options = Options()
-		# TODO: figure out how to supress Chrome window
-		#options.add_argument("--no-startup-window")
-		#options.add_argument("--silent-launch")
-		browser = webdriver.Chrome(chrome_options = options)
-		
-		# open interface page
-		url = "http://" + self.ip
-		browser.get(url)
-		time.sleep(1)
-		transport = browser.find_element_by_id("transport_page_link")
-		transport.click()
-		browser.switch_to_frame(browser.find_element_by_id("transport_controls_frame"))
-		
-		# do kipro function
-		if id:
-			button = browser.find_element_by_id(id)
-			button.click()
-			button.click()
-		
-		if showStatus:
-			disk = browser.find_element_by_id("eParamID_SelectedSlot").text
-			space = browser.find_element_by_id("eParamID_CurrentMediaAvailable").text
-			if space == "": space = "N/A"
-			timecode = browser.find_element_by_id("eParamID_DisplayTimecode").text
-			print "Selected Slot: " + disk
-			print "Space Available: " + space
-			if timecode == "00:00:00:00":
-				print "Status: Stopped"
-			else:
-				print "Status: Recording..."
-		
-		browser.switch_to_default_content()
-		browser.quit()
+	
+		if id == "record" and self.options["_record"] != "ON":
+			print "Option not enabled. Exiting."
+			return 1
+		elif  id == "stop" and self.options["_stop"] != "ON":
+			print "Option not enabled. Exiting."
+			return 1
+		elif  id == "slot" and self.options["_unmount"] != "ON":
+			print "Option not enabled. Exiting."
+			return 1
+		else:
+			options = Options()
+			# TODO: figure out how to supress Chrome window
+			#options.add_argument("--no-startup-window")
+			#options.add_argument("--silent-launch")
+			browser = webdriver.Chrome(chrome_options = options)
+			
+			# open interface page
+			url = "http://" + self.ip
+			browser.get(url)
+			time.sleep(1)
+			transport = browser.find_element_by_id("transport_page_link")
+			transport.click()
+			browser.switch_to_frame(browser.find_element_by_id("transport_controls_frame"))
+			
+			# do kipro function
+			if id:
+				button = browser.find_element_by_id(id)
+				button.click()
+				button.click()
+			
+			if showStatus:
+				disk = browser.find_element_by_id("eParamID_SelectedSlot").text
+				space = browser.find_element_by_id("eParamID_CurrentMediaAvailable").text
+				if space == "": space = "N/A"
+				timecode = browser.find_element_by_id("eParamID_DisplayTimecode").text
+				print "Selected Slot: " + disk
+				print "Space Available: " + space
+				if timecode == "00:00:00:00":
+					print "Status: Stopped"
+				else:
+					print "Status: Recording..."
+			
+			browser.switch_to_default_content()
+			browser.quit()
 
 def _main():
 

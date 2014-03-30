@@ -20,11 +20,11 @@ class _Computer:
 		self.username = config.get(name, "username")
 		self.password = hardware.decryptPassword(config, name)
 		self.client = None
-		self.options = _loadOptions(config, name)
+		self.options = self._loadOptions(config, name)
 		
 	def _loadOptions(self, config, name):
 		options = {}
-		for option in filter(lambda x: if x[0] == "_", config.options(name)):
+		for option in filter(lambda x: x[0] == "_", config.options(name)):
 			options[option] = config.get(name, option)
 		return options
 		
@@ -48,6 +48,10 @@ class _Computer:
 		self.client.close()
 	
 	def talk(self, message):
+	
+		if self.options["_talk"] != "ON":
+			print "Option not enabled. Exiting."
+			return 1
 		
 		# uses the say application
 		message = "say " + message
@@ -55,7 +59,10 @@ class _Computer:
 
 	def shutdown(self):
 		
-		#"""
+		if self.options["_shutdown"] != "ON":
+			print "Option not enabled. Exiting."
+			return 1
+			
 		chan = self.client.invoke_shell()
 		
 		# Ssh and wait for the password prompt.
@@ -72,23 +79,24 @@ class _Computer:
 def _main():
 	
 	parser = argparse.ArgumentParser(description = "Manages production computers")
-	parser.add_argument("-s", "--shutdown", action = "append", help = "Shuts down computer", default = [])
-	parser.add_argument("-t", "--talk", nargs = 2, help = "Speaks a message")
+	functions = parser.add_mutually_exclusive_group()
+	functions.add_argument("-s", "--shutdown", action = "append", help = "Shuts down computer", metavar = "COMPUTER", choices = hardware.getComputerList())
+	functions.add_argument("-t", "--talk", nargs = "+", help = "Speaks a message", metavar = ("COMPUTER", "MESSAGE"), choices = hardware.getComputerList())
 	args = parser.parse_args()
 	
-	computerList = args.shutdown
-	if args.shutdown == ["all"]:
-		computerList = hardware.getComputerList()
-	for name in computerList:
-		computer = _Computer(name)
-		computer.openConnection()
-		computer.shutdown()
-		computer.closeConnection()
+	if args.shutdown:
+		computerList = args.shutdown
+		if "all" in computerList: computerList = hardware.getComputerList()
+		for name in filter(lambda x: x in hardware.getComputerList(), computerList):
+			computer = _Computer(name)
+			computer.openConnection()
+			computer.shutdown()
+			computer.closeConnection()
 	
 	if args.talk:
 		computer = _Computer(args.talk[0])
 		computer.openConnection()
-		computer.talk(args.talk[1])
+		computer.talk(" ".join(talk[1:]))
 		computer.closeConnection()
 
 if __name__ == "__main__":

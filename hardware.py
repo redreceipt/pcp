@@ -8,6 +8,8 @@ import ConfigParser
 import argparse
 from Crypto.Cipher import AES
 
+_USING_RSA_KEYS = False
+
 _COMPUTER_LIST = [
 	"play1",
 	"cg",
@@ -47,7 +49,7 @@ def getAllDeviceNames():
 
 def _addComputer(config, section):
 	config.set(section, "ip")
-	config.set(section, "rsaKey")
+	if _USING_RSA_KEYS: config.set(section, "rsaKey")
 	config.set(section, "username")
 	config.set(section, "password")
 	config.set(section, "_shutdown", "OFF")
@@ -106,6 +108,7 @@ def _encryptPasswords():
 			if item[0] == "password":
 				for char in item[1]:
 					if char.isalpha() == False:
+						# TODO: make this a realtime password
 						aes = AES.new("this is the pcp password")
 						ciphertext = aes.encrypt(item[1] + ((32 - len(item[1])) * " "))
 						config.set(section, "password", ciphertext)

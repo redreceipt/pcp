@@ -43,9 +43,13 @@ def getDDRList():
 	"""Returns list of DDR devices."""
 	return _DDR_LIST
 
+def getDeviceList():
+	"""Returns list of generic devices."""
+	return _DEVICE_LIST
+
 def getAllDeviceNames():
 	"""Returns list of every device within PCP."""
-	return getComputerList() + getProjectorList() + getDDRList()
+	return getComputerList() + getProjectorList() + getDDRList() + getDeviceList()
 
 def _addComputer(config, section):
 	config.set(section, "ip")
@@ -81,14 +85,14 @@ def _initHardwareCFG():
 		
 	list = getDDRList()
 	for DDR in list:
-		config.add_section(computer)
-		config = _addComputer(config, computer)
+		config.add_section(DDR)
+		config = _addDDR(config, computer)
 
 	# Devices with only IP addresses and power control
 	list = getProjectorList()
-	for device in list:
-		config.add_section(device)
-		config = _addDevice(config, device)
+	for projector in list:
+		config.add_section(projector)
+		config = _addDevice(config, projector)
 
 	# overwrite new hardware.cfg file
 	with open("./hardware.cfg", "wb") as hwcfg:

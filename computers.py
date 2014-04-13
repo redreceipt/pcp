@@ -20,9 +20,9 @@ class _Computer:
 		self.username = config.get(name, "username")
 		self.password = hardware.decryptPassword(config, name)
 		self.client = None
-		self.options = self._loadOptions(config, name)
+		self.options = self.loadOptions(config, name)
 		
-	def _loadOptions(self, config, name):
+	def loadOptions(self, config, name):
 		options = {}
 		for option in filter(lambda x: x[0] == "_", config.options(name)):
 			options[option] = config.get(name, option)

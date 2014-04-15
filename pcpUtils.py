@@ -15,6 +15,7 @@ _COMPUTER_LIST = [
 	"cg",
 	"teleprompt",
 	"pvp",
+	"prereel"
 ]
 
 _PROJECTOR_LIST = [
@@ -77,22 +78,20 @@ def _initHardwareCFG():
 	# build new config file (use config.read() to read existing)
 	config = ConfigParser.ConfigParser()
 	
+	list = getAllDeviceNames()
+	for device in list: config.add_section(device)
+	
 	# Computers
 	list = getComputerList()
-	for computer in list:
-		config.add_section(computer)
-		config = _addComputer(config, computer)
+	for computer in list: config = _addComputer(config, computer)
 		
+	# DDRs
 	list = getDDRList()
-	for DDR in list:
-		config.add_section(DDR)
-		config = _addDDR(config, computer)
+	for DDR in list: config = _addDDR(config, DDR)
 
 	# Devices with only IP addresses and power control
-	list = getProjectorList()
-	for projector in list:
-		config.add_section(projector)
-		config = _addDevice(config, projector)
+	list = getProjectorList() + getDeviceList()
+	for device in list: config = _addDevice(config, device)
 
 	# overwrite new hardware.cfg file
 	with open("./hardware.cfg", "wb") as hwcfg:
@@ -112,7 +111,7 @@ def _encryptPasswords():
 			if item[0] == "password":
 				for char in item[1]:
 					if char.isalpha() == False:
-						# TODO: make this a realtime password
+						# TODO: make this a real time password
 						aes = AES.new("this is the pcp password")
 						ciphertext = aes.encrypt(item[1] + ((32 - len(item[1])) * " "))
 						config.set(section, "password", ciphertext)
@@ -121,10 +120,11 @@ def _encryptPasswords():
 	with open("./hardware.cfg", "wb") as hwcfg:
 		config.write(hwcfg)
 
-def decryptPassword(config, section):
+def decryptPassword(section):
 	"""Decrypts passwords from hardware.cfg."""
 
 	encrypted = False
+	config = ConfigParser.ConfigParser()
 	config.read("hardware.cfg")
 	aes = AES.new("this is the pcp password")
 	for char in config.get(section, "password"):
@@ -135,6 +135,23 @@ def decryptPassword(config, section):
 		return aes.decrypt(config.get(section, "password")).strip()
 	else:
 		return config.get(section, "password")
+
+def getProperty(name, property):
+	"""Returns value of property from hardware.cfg."""
+
+	config = ConfigParser.ConfigParser()
+	config.read("hardware.cfg")
+	return config.get(name, property)
+	
+
+def loadOptions(deviceName):
+	"""Returns dictionary of device functionality."""
+	config = ConfigParser.ConfigParser()
+	config.read("hardware.cfg")
+	options = {}
+	for option in filter(lambda x: x[0] == "_", config.options(deviceName)):
+		options[option] = config.get(deviceName, option)
+	return options
 
 def _main():
 	

@@ -5,7 +5,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
-import ConfigParser
 from multiprocessing import Process
 import argparse
 
@@ -14,16 +13,8 @@ class _Projector:
 	
 	def __init__(self, name):
 		
-		config = ConfigParser.ConfigParser()
-		config.read("hardware.cfg")
-		self.ip = config.get(name, "ip")
-		self.options = self.loadOptions(config, name)
-		
-	def loadOptions(self, config, name):
-		options = {}
-		for option in filter(lambda x: x[0] == "_", config.options(name)):
-			options[option] = config.get(name, option)
-		return options
+		self.ip = utils.getProperty(name, "ip")
+		self.options = utils.loadOptions(name)
 		
 	def getOption(self, option):
 		"""Returns hardware capability options."""

@@ -4,29 +4,19 @@
 
 import os, time
 import paramiko, base64
-import ConfigParser
 import argparse
-import hardware
+import pcpUtils as utils
 
 class _Computer:
 	
 	def __init__(self, name):
 		
-		config = ConfigParser.ConfigParser()
-		config.read("hardware.cfg")
-		
-		self.ip = config.get(name, "ip")
-		self.key = config.get(name, "rsaKey")
-		self.username = config.get(name, "username")
-		self.password = hardware.decryptPassword(config, name)
+		self.ip = utils.getProperty(name, "ip")
+		self.key = utils.getProperty(name, "rsaKey")
+		self.username = utils.getProperty(name, "username")
+		self.password = utils.decryptPassword(name)
 		self.client = None
-		self.options = self.loadOptions(config, name)
-		
-	def loadOptions(self, config, name):
-		options = {}
-		for option in filter(lambda x: x[0] == "_", config.options(name)):
-			options[option] = config.get(name, option)
-		return options
+		self.options = utils.loadOptions(name)
 		
 	def getOption(self, option):
 		"""Returns hardware capability options."""
@@ -80,14 +70,14 @@ def _main():
 	
 	parser = argparse.ArgumentParser(description = "Manages production computers")
 	functions = parser.add_mutually_exclusive_group()
-	functions.add_argument("-s", "--shutdown", action = "append", help = "Shuts down computer", metavar = "COMPUTER", choices = hardware.getComputerList())
-	functions.add_argument("-t", "--talk", nargs = "+", help = "Speaks a message", metavar = ("COMPUTER", "MESSAGE"), choices = hardware.getComputerList())
+	functions.add_argument("-s", "--shutdown", action = "append", help = "Shuts down computer", metavar = "COMPUTER", choices = utils.getComputerList())
+	functions.add_argument("-t", "--talk", nargs = "+", help = "Speaks a message", metavar = ("COMPUTER", "MESSAGE"), choices = utils.getComputerList())
 	args = parser.parse_args()
 	
 	if args.shutdown:
 		computerList = args.shutdown
-		if "all" in computerList: computerList = hardware.getComputerList()
-		for name in filter(lambda x: x in hardware.getComputerList(), computerList):
+		if "all" in computerList: computerList = utils.getComputerList()
+		for name in filter(lambda x: x in utils.getComputerList(), computerList):
 			computer = _Computer(name)
 			computer.openConnection()
 			computer.shutdown()
